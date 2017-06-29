@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "62061920387",
+    "firebase_url": "https://saleslocation-23281.firebaseio.com",
+    "project_id": "saleslocation-23281",
+    "storage_bucket": "saleslocation-23281.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62061920387:android:e9bb0109462ae829",
+        "android_client_info": {
+          "package_name": "com.howinecafe.saleslocation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "62061920387-nvcri3vm6k52vvggh9a9au19308dn6c7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.howinecafe.saleslocation",
+            "certificate_hash": "c0d4916a05c0b9606f98aa9a2d36e39832159257"
+          }
+        },
+        {
+          "client_id": "62061920387-kio33cj3das6nnm69tnqp8dl0k5qjdr4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAClUZHPwf76haGrnTnrCWPz6gl_Ut_K64"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "62061920387-kio33cj3das6nnm69tnqp8dl0k5qjdr4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
