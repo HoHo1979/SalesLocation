@@ -2,6 +2,7 @@ package com.howinecafe.saleslocation.data;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by JamesHo on 3/28/2017.
@@ -11,7 +12,7 @@ public class Sales implements Serializable {
 
     String name;
     String email;
-    List<String> locations;
+    Map<String,Boolean> locations;
 
     public Sales() {
     }
@@ -32,11 +33,11 @@ public class Sales implements Serializable {
         this.email = email;
     }
 
-    public List<String> getLocations() {
+    public Map<String, Boolean> getLocations() {
         return locations;
     }
 
-    public void setLocations(List<String> locations) {
+    public void setLocations(Map<String, Boolean> locations) {
         this.locations = locations;
     }
 }

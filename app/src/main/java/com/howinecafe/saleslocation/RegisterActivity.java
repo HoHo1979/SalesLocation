@@ -23,7 +23,9 @@ import com.howinecafe.saleslocation.data.SalesLocation;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -102,7 +104,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         sales.setEmail(email);
                         sales.setName("James Ho");
 
-                        List<String> locationKeyList = new ArrayList<>();
+                        Map<String,Boolean> locationKeyMap = new HashMap<String, Boolean>();
 
                         DatabaseReference locationRef=database.getReference("locations").child(user.getUid());
 
@@ -114,12 +116,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         String locationkey2=locationRef.push().getKey();
                         locationRef.child(locationkey2).setValue(location1);
 
-                        locationKeyList.add(locationkey);
-                        locationKeyList.add(locationkey2);
-
-                        sales.setLocations(locationKeyList);
-
                         mRef.setValue(sales);
+
+                        mRef.child("locations").child(locationkey).setValue(true);
+                        mRef.child("locations").child(locationkey2).setValue(true);
 
                         getIntent().putExtra("LOGIN_EMAIL",email);
                         getIntent().putExtra("LOGIN_PASSWORD",password);

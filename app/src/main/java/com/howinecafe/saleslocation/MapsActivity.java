@@ -1,15 +1,18 @@
 package com.howinecafe.saleslocation;
 
-import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -17,22 +20,39 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.howinecafe.saleslocation.data.SalesLocation;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.util.Date;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCompleteListener<Void>, View.OnClickListener {
 
     private static final int REQUEST_LOCATION = 2;
     private static final String TAG = MapsActivity.class.getSimpleName() ;
     private GoogleMap mMap;
+    private Button but_checkin;
+    private Button but_checkout;
+    private final int CHECK_IN=100;
+    private final int CHECK_OUT=200;
+
+    LocationListener locationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.map_fragment_layout);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        but_checkin = (Button) findViewById(R.id.but_checkin);
+        but_checkin.setOnClickListener(this);
+        but_checkout= (Button) findViewById(R.id.but_checkout);
+        but_checkout.setOnClickListener(this);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -51,6 +71,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -91,27 +113,84 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setupMyLocation() {
+
+        LatLng sydney = new LatLng(-33.867, 151.206);
         //noinspection MissingPermission
         mMap.setMyLocationEnabled(true);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,13));
 
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
 
+//                Criteria criteria = new Criteria();
+//                criteria.setAccuracy(Criteria.ACCURACY_FINE);
+
                 LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                String provider ="gps";
+                String provider = LocationManager.GPS_PROVIDER;
                 //noinspection MissingPermission
                 Location location = manager.getLastKnownLocation(provider);
 
                 if(location!=null) {
                     Log.e(TAG,location.getLatitude()+" "+location.getLongitude()+"");
-                    LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.addMarker(new MarkerOptions().position(sydney).title("Office"));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+                    LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Office"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+
+                    Date date = new Date();
+                    SalesLocation salesLocation = new SalesLocation(location.getLatitude(),location.getLongitude(),provider,date.getTime());
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("locations");
+                    String key = reference.child(user.getUid()).push().getKey();
+
+                    reference.child(user.getUid()).child(key)
+                            .setValue(salesLocation)
+                            .addOnCompleteListener(MapsActivity.this);
+
+                    //update sales location record
+                    DatabaseReference salesReference = FirebaseDatabase.getInstance().getReference("sales");
+                    salesReference.child(user.getUid()).child("locations").child(key).setValue(true);
+
+
                 }
 
                 return false;
             }
         });
+    }
+
+
+    @Override
+    public void onComplete(@NonNull Task<Void> task) {
+
+        if(task.isSuccessful()){
+
+            setResult(RESULT_OK);
+            finish();
+
+        }else{
+            new AlertDialog.Builder(this).setTitle("Cannot save location")
+                    .setMessage("Please change location and click again")
+                    .show();
+        }
+
+
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        if(v==but_checkin){
+
+            Log.i(TAG, "onClick: "+"Check in Button clicked");
+
+        }else if(v==but_checkout){
+
+            Log.d(TAG, "onClick: "+"Check out Button CLicked");
+
+        }
+
+
     }
 }

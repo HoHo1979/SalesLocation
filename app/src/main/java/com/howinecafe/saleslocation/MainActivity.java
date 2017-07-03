@@ -43,8 +43,9 @@ public class MainActivity extends AppCompatActivity implements FirebaseAuth.Auth
         findViewById(R.id.but_login).setOnClickListener(this);
 
         email = (EditText) findViewById(R.id.ed_lgemail);
+        email.setText("123@gmail.com");
         password = (EditText) findViewById(R.id.ed_lgpassword);
-
+        password.setText("123456");
 
         if(auth!=null){
             auth.signOut();

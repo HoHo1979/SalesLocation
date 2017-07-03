@@ -1,16 +1,13 @@
 package com.howinecafe.saleslocation;
 
-import android.location.*;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,19 +16,34 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.howinecafe.saleslocation.LocationsViewAdapter;
-import com.howinecafe.saleslocation.R;
 import com.howinecafe.saleslocation.data.SalesLocation;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LocationsActivity extends AppCompatActivity implements ChildEventListener, ValueEventListener {
 
     private static final String TAG = "**********"+LocationsActivity.class.getSimpleName();
+    private static final int CLICK_OK = 100;
     private RecyclerView recyclerView;
-    List<SalesLocation> locationList = new ArrayList<>();
+    Set<SalesLocation> locationList = new HashSet<>();
     private LocationsViewAdapter locationsViewAdapter;
+    private List<SalesLocation> salesList;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode==CLICK_OK){
+
+            if(resultCode==RESULT_OK) {
+                locationsViewAdapter.notifyDataSetChanged();
+            }
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +60,9 @@ public class LocationsActivity extends AppCompatActivity implements ChildEventLi
 
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        locationsViewAdapter = new LocationsViewAdapter(locationList);
+        salesList = new ArrayList<>();
+        salesList.addAll(locationList);
+        locationsViewAdapter = new LocationsViewAdapter(salesList);
         recyclerView.setAdapter(locationsViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -57,8 +71,8 @@ public class LocationsActivity extends AppCompatActivity implements ChildEventLi
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(LocationsActivity.this,MapsActivity.class);
+                startActivityForResult(intent,CLICK_OK);
             }
         });
     }
@@ -87,12 +101,16 @@ public class LocationsActivity extends AppCompatActivity implements ChildEventLi
     @Override
     public void onDataChange(DataSnapshot dataSnapshot) {
 
+        salesList.removeAll(locationList);
+
         for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
 
              SalesLocation location =  dataSnapshot1.getValue(SalesLocation.class);
              locationList.add(location);
 
         }
+
+        salesList.addAll(locationList);
         locationsViewAdapter.notifyDataSetChanged();
     }
 
